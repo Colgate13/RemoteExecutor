@@ -2,13 +2,14 @@
   "name": "remote-executor-app",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "main.ts",
   "scripts": {
     "start": "electron ."
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^18.11.18",
     "electron": "^22.0.1"
   }
 }
