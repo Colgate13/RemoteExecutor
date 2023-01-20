@@ -1,0 +1,22 @@
+{
+  "name": "remoteexecutor",
+  "version": "1.0.0",
+  "description": "1.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "dist/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Colgate13/RemoteExecutor.git"
+  },
+  "author": "Gabriel Barros Feitosa Sa (Colgate13)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Colgate13/RemoteExecutor/issues"
+  },
+  "homepage": "https://github.com/Colgate13/RemoteExecutor#readme",
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
+}
