@@ -1,0 +1,7 @@
+1 - [ ] Persistence
+2 - [ ] Keylogger to find sudo password
+3 - [ ] Multi-threading / Multi-processing - Hydra feature
+4 - [ ] Get machine info
+5 - [ ] Get user info
+6 - [ ] Send data to server
+7 - [ ] Reverse shell
