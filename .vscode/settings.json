@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "keylogger.h": "c",
+    "input.h": "c",
+    "stdlib.h": "c"
+  }
+}

