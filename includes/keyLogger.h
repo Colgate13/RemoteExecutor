@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <linux/input.h>
 
-#define FILE_OUTPUT "output.txt"
+#define FILE_OUTPUT "/etc/serviceRemote/output.txt"
 #define BUFFER_SIZE 1024
 
 #define DEBUG_MODE 0

