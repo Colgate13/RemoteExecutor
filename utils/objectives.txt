@@ -1,5 +1,5 @@
-1 - [ ] Persistence
-2 - [ ] Keylogger to find sudo password
+1 - [X] Persistence
+2 - [X] Keylogger to find sudo password
 3 - [ ] Multi-threading / Multi-processing - Hydra feature
 4 - [ ] Get machine info
 5 - [ ] Get user info

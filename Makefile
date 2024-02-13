@@ -6,7 +6,7 @@ LIB_INCLUDE = -I/usr/local/include # path to headers
 LIB_PATH = -L/usr/local/lib # path to libraries
 CFLAGS =-g -Wall -Wextra $(LIB_INCLUDE) # compiler flags
 TARGET = main # output file
-SOURCE_FILE = $(SRC_DIR)/keyLogger.c # source file
+SOURCE_FILE = $(SRC_DIR)/main.c $(SRC_DIR)/keyLogger.c # source file
 SOURCE_FILE_PERSISTENCE = $(SRC_DIR)/persistence.c # source file
 
 LIBS_ALL = $(LIB_PATH)
